@@ -1,6 +1,6 @@
 # MiniBolt Info
 
-A bash script to monitor a [MiniBolt node](https://v2.minibolt.info/home/readme) health and activity at a glance.
+A bash script to monitor a [MiniBolt node](https://v2.minibolt.info) health and activity at a glance.
 
 ## Installation
 
@@ -9,10 +9,10 @@ A bash script to monitor a [MiniBolt node](https://v2.minibolt.info/home/readme)
   $ cd /tmp/
   $ git clone https://github.com/minibolt-guide/minibolt_info
   $ cd minibolt_info
-  $ nano *.sh --linenumbers # Inspect the scripts to make sure it does not do bad things. Exit with Ctrl-X
-  $ sudo chmod +x *.sh  # Install the script and make it executable
-  $ sudo cp *.sh /usr/local/bin/
+  $ sudo install -m 0755 -o root -g root -t /usr/local/bin *.sh
+  $ minibolt.sh
   ```
+
 ## Disable admin password request (optional -caution!)
 
 [how to disable admin password request](https://v2.minibolt.info/bonus-guides/system/ssh-keys#disable-admin-password-request-optional-caution)
