@@ -154,7 +154,7 @@ printf "%0.s#" {1..70}
 echo -ne '\r### Determining channel db size \r'
 
 #get channel.db size
-ln_channel_db_size=$( sudo du -h ${lnd_dir}/data/graph/mainnet/channel.db | awk '{print $1}')
+ln_channel_db_size=$(sudo su - postgres -c "psql -At -c \"SELECT pg_size_pretty(pg_database_size('lndb'));\"")
 
 printf "%0.s#" {1..76}
 echo -ne '\r### Saving \r'
