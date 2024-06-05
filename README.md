@@ -1,4 +1,4 @@
-# MiniBolt Info
+# MiniBolt System Overview
 
 A bash script to monitor a [MiniBolt node](https://v2.minibolt.info) health and activity at a glance.
 
@@ -24,7 +24,7 @@ A bash script to monitor a [MiniBolt node](https://v2.minibolt.info) health and 
   $ minibolt.sh
   ```
 
-  ```
+  ```sh
   $ sudo rm -r minibolt_info
   ```
 
