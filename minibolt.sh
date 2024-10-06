@@ -143,9 +143,9 @@ fi
 # Print first welcome message
 # ------------------------------------------------------------------------------
 printf "
-${color_blue}MiniBolt %s:${color_grey}  \033[1m"₿"\033[22mitcoin full node
+${color_blue}MiniBolt %s:${color_grey}  \033[1m"₿"\033[22mitcoin & Lightning full node
 ${color_blue}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-" "v2"
+"
 
 
 # Get system updates
