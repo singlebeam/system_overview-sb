@@ -20,7 +20,7 @@ else
     ln_running="up"
   fi
 fi
-lncli="/home/lightningd/lightning/cli/lightning-cli"
+lncli="/usr/local/bin/lightning-cli"
 
 printf "%0.s#" {1..63}
 echo -ne '\r### Loading CoreLN data \r'
@@ -130,8 +130,7 @@ else
 fi
 
 #get channel.db size
-coreln_dir="/data/lightningd"
-ln_channel_db_size=$(du -h ${coreln_dir}/bitcoin/lightningd.sqlite3 | awk '{print $1}')
+ln_channel_db_size=$(sudo su - postgres -c "psql -At -d clndb -c \"SELECT pg_size_pretty(pg_database_size('clndb'));\"")
 
 # Write to JSON file
 lnd_infofile="${HOME}/.minibolt.lndata.json"
