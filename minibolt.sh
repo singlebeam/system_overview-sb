@@ -786,9 +786,12 @@ if [ "$rtl_status" = "active" ]; then
   if [ "$rtl_status" = "active" ]; then
     lwserver_running="up"
     lwserver_color="${color_green}"
-    rtlpi=v$(cd /home/${un_rtl}/RTL; npm version | grep -oP "rtl: '\K(.*)(?=-beta')")
+    # Get the full version string including "-beta"
+    rtlpi_full=v$(sudo head -n 3 /home/rtl/RTL/package.json | grep -oE '"version": "[0-9.]+(-beta)?"' | awk -F'"' '{print $4}')
+    # Extract just the version number for comparison
+    rtlpi=$(echo "$rtlpi_full" | sed 's/-beta//')
     if [ "$rtlpi" = "$rtlgit" ]; then
-      lwserver_version="$rtlpi"
+      lwserver_version="$rtlpi_full"  # Use the full version with "-beta"
       lwserver_version_color="${color_green}"
     else
       lwserver_version="${rtlpi} to ${rtlgit}"
