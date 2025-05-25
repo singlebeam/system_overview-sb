@@ -8,9 +8,8 @@ set -u
 # ------------------------------------------------------------------------------
 
 # set datadir
-bitcoin_dir="/data/bitcoin"  
-bitcoin_onion_address=$(bitcoin-cli getnetworkinfo | grep address.*onion)   
-
+bitcoin_dir="/data/bitcoin"
+bitcoin_onion_address=$(bitcoin-cli getnetworkinfo | grep address.*onion)
 
 # determine second drive info
 drivecount=$(lsblk --output MOUNTPOINT | grep / | grep -v /boot | sort | wc -l)
@@ -30,6 +29,7 @@ sn_electrs="electrs"
 sn_fulcrum="fulcrum"
 sn_rtl="rtl"                            # rtl, ridethelightning
 sn_thunderhub="thunderhub"
+sn_uwsgi="uwsgi"
 
 # Helper functionality
 # ------------------------------------------------------------------------------
@@ -46,17 +46,17 @@ color_white='\033[37;3m'
 
 
 
-# git repo urls latest version 
-bitcoin_git_repo_url="https://api.github.com/repos/bitcoin/bitcoin/releases/latest" 
-electrs_git_repo_url="https://api.github.com/repos/romanz/electrs/releases/latest" 
+# git repo urls latest version
+bitcoin_git_repo_url="https://api.github.com/repos/bitcoin/bitcoin/releases/latest"
+electrs_git_repo_url="https://api.github.com/repos/romanz/electrs/releases/latest"
 mempool_git_repo_url="https://api.github.com/repos/mempool/mempool/releases/latest"
-btcrpcexplorer_git_repo_url="https://api.github.com/repos/janoside/btc-rpc-explorer/releases/latest" 
-rtl_git_repo_url="https://api.github.com/repos/Ride-The-Lightning/RTL/releases/latest" 
-fulcrum_git_repo_url="https://api.github.com/repos/cculianu/Fulcrum/releases/latest" 
-thunderhub_git_repo_url="https://api.github.com/repos/apotdevin/thunderhub/releases/latest" 
-lnd_git_repo_url="https://api.github.com/repos/lightningnetwork/lnd/releases/latest" 
-cln_git_repo_url="https://api.github.com/repos/ElementsProject/lightning/releases/latest" 
-
+btcrpcexplorer_git_repo_url="https://api.github.com/repos/janoside/btc-rpc-explorer/releases/latest"
+rtl_git_repo_url="https://api.github.com/repos/Ride-The-Lightning/RTL/releases/latest"
+fulcrum_git_repo_url="https://api.github.com/repos/cculianu/Fulcrum/releases/latest"
+thunderhub_git_repo_url="https://api.github.com/repos/apotdevin/thunderhub/releases/latest"
+lnd_git_repo_url="https://api.github.com/repos/lightningnetwork/lnd/releases/latest"
+cln_git_repo_url="https://api.github.com/repos/ElementsProject/lightning/releases/latest"
+lndg_git_repo_url="https://api.github.com/repos/cryptosharks131/lndg/releases/latest"
 
 # controlled abort on Ctrl-C
 trap_ctrlC() {
@@ -71,7 +71,7 @@ trap trap_ctrlC SIGINT SIGTERM
 # print usage information for script
 usage() {
   echo "MiniBolt Welcome: system status overview
-usage: $(basename "$0") 
+usage: $(basename "$0")
 --help             display this help and exit
 --last-update, -l  show when files with saved values were last updated
 --mock, -m         run the script mocking the Lightning data
@@ -114,8 +114,8 @@ function print_last_modified() {
 }
 
 updatesstatusfile="${HOME}/.minibolt.updates.json"
-gitstatusfile="${HOME}/.minibolt.versions.json" 
-lnd_infofile="${HOME}/.minibolt.lndata.json"  
+gitstatusfile="${HOME}/.minibolt.versions.json"
+lnd_infofile="${HOME}/.minibolt.lndata.json"
 
 function last_updated() {
   print_last_modified $updatesstatusfile
@@ -150,7 +150,7 @@ ${color_blue}━━━━━━━━━━━━━━━━━━━━━━�
 
 # Get system updates
 # ------------------------------------------------------------------------------
- 
+
 
 save_updates() {
   # write to json file
@@ -201,7 +201,7 @@ fi
 
 
 
-# Gather system data 
+# Gather system data
 # ------------------------------------------------------------------------------
 printf "%0.s#" {1..40}
 echo -ne '\r### Loading System data \r'
@@ -271,7 +271,7 @@ network_tx=$(ip -j -s link show | jq '.[] | [(select(.ifname!="lo") | .stats64.t
 
 # Gather application versions
 # ------------------------------------------------------------------------------
- 
+
 
 save_minibolt_versions() {
   # write to json file
@@ -287,6 +287,7 @@ save_minibolt_versions() {
     "rtl": "${rtlgit}",
     "fulcrum": "${fulcrumgit}",
     "thunderhub": "${thunderhubgit}"
+    "lndg": "${lndggit}"
   }
 }
 EOF
@@ -298,10 +299,11 @@ load_minibolt_versions() {
   clngit=$(cat ${gitstatusfile} | jq -r '.githubversions.cln')
   electrsgit=$(cat ${gitstatusfile} | jq -r '.githubversions.electrs')
   btcrpcexplorergit=$(cat ${gitstatusfile} | jq -r '.githubversions.blockexplorer')
-  mempoolgit=$(cat ${gitstatusfile} | jq -r '.githubversions.mempool')  
+  mempoolgit=$(cat ${gitstatusfile} | jq -r '.githubversions.mempool')
   rtlgit=$(cat ${gitstatusfile} | jq -r '.githubversions.rtl')
   fulcrumgit=$(cat ${gitstatusfile} | jq -r '.githubversions.fulcrum')
   thunderhubgit=$(cat ${gitstatusfile} | jq -r '.githubversions.thunderhub')
+  lndggit=$(cat ${gitstatusfile} | jp -r '.githubversions.lndg')
 }
 
 
@@ -336,7 +338,9 @@ fetch_githubversion_lnd() {
 fetch_githubversion_cln() {
   clngit=$(curl -s --connect-timeout 5 ${cln_git_repo_url} | jq -r '.tag_name | select(.!=null)')
 }
-
+fetch_githubversion_lndg() {
+  lndggit=$(curl -s --connect-timeout 5 ${lndg_git_repo_url} | jq -r '.tag_name | select(.!=null)')
+}
 
 # Check if we should update with latest versions from github
 gitupdate="0"
@@ -358,6 +362,7 @@ if [ "${gitupdate}" -eq "1" ]; then
   fetch_githubversion_rtl
   fetch_githubversion_fulcrum
   fetch_githubversion_thunderhub
+  fetch_githubversion_lndg
   # write to json file
   save_minibolt_versions
 else
@@ -401,6 +406,10 @@ if [ -z "$fulcrumgit" ]; then
 fi
 if [ -z "$thunderhubgit" ]; then
   fetch_githubversion_thunderhub
+  resaveminibolt="1"
+fi
+if [ -z "$lndggit" ]; then
+  fetch_githubversion_lndg
   resaveminibolt="1"
 fi
 if [ "${resaveminibolt}" -eq "1" ]; then
@@ -517,7 +526,7 @@ fi
 printf "%0.s#" {1..60}
 
 load_lightning_data() {
-  
+
   ln_file_content=$(cat $lnd_infofile)
   ln_color="$(echo $ln_file_content | jq -r '.ln_color')"
   ln_version_color="$(echo $ln_file_content | jq -r '.ln_version_color')"
@@ -656,14 +665,13 @@ electrs_status=$( systemctl is-active    ${sn_electrs} 2>&1)
 fulcrum_status=$( systemctl is-active    ${sn_fulcrum} 2>&1)
 # Electrs specific
 if [ "$electrs_status" = "active" ]; then
-  electrs_status=$( systemctl is-active ${sn_electrs} 2>&1)
+  electrs_status=$(systemctl is-active ${sn_electrs} 2>&1)
   eserver_found=1
   eserver_label="Electrs"
   eserver_running="down"
   if [ "$electrs_status" = "active" ]; then
     eserver_running="up"
     eserver_color="${color_green}"
-    # Request params are client_name, protocol_version. Example result being parsed: ["Electrs 0.9.10", "1.4"]
     # Try both ports 50001 and 50021
     for port in 50001 50021; do
       electrspi=$(echo '{"jsonrpc": "2.0", "method": "server.version", "params": [ "minibolt", "1.4" ], "id": 0}' | netcat 127.0.0.1 $port -q 1 | jq -r '.result[0]' | awk '{print "v"substr($1,9)}' 2>/dev/null)
@@ -776,7 +784,9 @@ if [ "$rtl_status" != "active" ]; then  # fallback from rtl to ridethelightning 
   rtl_status=$( systemctl is-active    ${sn_rtl} 2>&1)
 fi
 thunderhub_status=$( systemctl is-active    ${sn_thunderhub} 2>&1)
-# Ride the Ligthning specific
+uwsgi_status=$( systemctl is-active    ${sn_uwsgi} 2>&1)
+
+# Ride the Lightning specific
 if [ "$rtl_status" = "active" ]; then
   un_rtl=$( systemctl show -pUser ${sn_rtl} | awk '{split($0,a,"="); print a[2]}')
   rtl_status=$( systemctl is-active ${sn_rtl} 2>&1)
@@ -794,7 +804,7 @@ if [ "$rtl_status" = "active" ]; then
       lwserver_version="$rtlpi_full"  # Use the full version with "-beta"
       lwserver_version_color="${color_green}"
     else
-      lwserver_version="${rtlpi} to ${rtlgit}"
+      lwserver_version="${rtlpi_full} to ${rtlgit}"
     fi
   fi
 # Thunderhub specific
@@ -806,7 +816,7 @@ elif [ "$thunderhub_status" = "active" ]; then
   lwserver_running="down"
   if [ "$thunderhub_status" = "active" ]; then
     lwserver_running="up"
-    lwserver_color="${color_green}"    
+    lwserver_color="${color_green}"
     thunderhubpi=v$( sudo  head -n 3 /home/thunderhub/thunderhub/package.json | grep version | awk -F'"' '{print $4}')
     if [ "$thunderhubpi" = "$thunderhubgit" ]; then
       lwserver_version="$thunderhubpi"
@@ -815,12 +825,32 @@ elif [ "$thunderhub_status" = "active" ]; then
       lwserver_version="${thunderhubpi} to ${thunderhubgit}"
     fi
   fi
+
 # ... add any future supported lightning web app implementation checks here
+
+# LNDg specific
+elif [ "$uwsgi_status" = "active" ]; then # Use sn_uwsgi
+  un_uwsgi=$( systemctl show -pUser ${sn_uwsgi} | awk '{split($0,a,"="); print a[2]}')
+  uwsgi_status=$( systemctl is-active ${sn_uwsgi} 2>&1)
+  lwserver_found=1
+  lwserver_label="LNDg" # Display name for LNDg
+  lwserver_running="down"
+  if [ "$uwsgi_status" = "active" ]; then
+    lwserver_running="up"
+    lwserver_color="${color_green}"
+    # Get LNDg version from package.json or similar file
+    lndgpi=$(sudo -u lndg grep -m 1 "LNDg v" /home/lndg/lndg/gui/templates/base.html | awk '{print $NF}' | sed 's/<\/center>//')
+    if [ "$lndgpi" = "$lndggit" ]; then
+      lwserver_version="$lndgpi"
+      lwserver_version_color="${color_green}"
+    else
+      lwserver_version="${lndgpi} to ${lndggit}"
+    fi
+  fi
 fi
 if [ "$lwserver_found" -eq 0 ]; then
   lwserver_color="${color_grey}"
 fi
-
 
 
 # Render output MiniBolt
