@@ -868,7 +868,7 @@ ${color_blue} ╠  ${color_white}      ┌╣      ╢╢╢ ${color_blue}      
 ${color_blue}╘╠   ${color_white}    ╣╢╢      ╢╢╢${color_blue}     ╫╝                                 ${lserver_dataline_4}${color_grey}
 ${color_blue} ╠   ${color_white}    ╢╢╢╢╢╢╠   ╢╢             ${color_blue}%-20s${eserver_color}%-4s${color_grey}   ${lserver_dataline_5}${color_grey}
 ${color_blue} ╘╢╖  ${color_white}   ╝╝╝╝╝ ${color_blue}      ╖╓╣╢         ${eserver_version_color}%-26s ${lserver_dataline_6}${color_grey}
-${color_blue}   ╙╝╢╠╗╗╥╥╥╥╥╥╗╗╠╢╢╝╨╙                                        ${lserver_dataline_7}${color_grey}
+${color_blue}   ╙╝╢╠╗╗╥╥╥╥╥╥╗╗╠╢╢╝╨╙                                      ${lserver_dataline_7}${color_grey}
                                   ${color_blue}%-20s${color_grey}${bserver_color}%-4s${color_grey}
 ${color_red}                                  ${bserver_version_color}%-24s${color_grey}   ${color_blue}%-20s${lwserver_color}%-4s${color_grey}
 ${color_red}                                                             ${lwserver_version_color}%-24s${color_grey}
